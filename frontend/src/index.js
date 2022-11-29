@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 import Login from "./Login";
+import Play from "./Play";
 import AddFlashcard from "./AddFlashcard";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -17,6 +18,11 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+
+  {
+    path: "/play",
+    element: <Play />,
   },
 ]);
 

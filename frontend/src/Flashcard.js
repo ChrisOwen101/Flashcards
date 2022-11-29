@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Flashcard({ flashcard }) {
+export default function Flashcard({ flashcard, onClick }) {
   const [flip, setFlip] = useState(false);
   const [height, setHeight] = useState("initial");
+  const navigate = useNavigate();
 
   const frontEl = useRef();
   const backEl = useRef();
@@ -13,11 +15,22 @@ export default function Flashcard({ flashcard }) {
     setHeight(Math.max(frontHeight, backHeight, 100));
   }
 
-  useEffect(setMaxHeight, [flashcard.question, flashcard.answer]);
+  useEffect(() => {
+    setMaxHeight();
+    setFlip(false);
+  }, [flashcard.question, flashcard.answer]);
+
   useEffect(() => {
     window.addEventListener("resize", setMaxHeight);
     return () => window.removeEventListener("resize", setMaxHeight);
   }, []);
+
+  function onEditClicked() {
+    console.log(flashcard);
+    navigate("/addcard", {
+      state: flashcard,
+    });
+  }
 
   return (
     <div
@@ -26,14 +39,36 @@ export default function Flashcard({ flashcard }) {
       onClick={() => {
         if (!flip) {
           setFlip(!flip);
+          onClick();
         }
       }}
     >
       <div className="front" ref={frontEl}>
-        {flashcard.question}
+        <h1>{flashcard.question}</h1>
+        <div>
+          <h6>
+            Tags:{" "}
+            {flashcard.tags ? (
+              flashcard.tags
+                .map((tag) => {
+                  return tag.name;
+                })
+                .join(", ")
+            ) : (
+              <></>
+            )}
+          </h6>
+          <button
+            onClick={() => {
+              onEditClicked();
+            }}
+          >
+            Edit Card
+          </button>
+        </div>
       </div>
       <div className="back" ref={backEl}>
-        {flashcard.answer}
+        <h1>{flashcard.answer}</h1>
       </div>
     </div>
   );

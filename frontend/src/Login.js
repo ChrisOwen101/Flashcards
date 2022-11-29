@@ -16,6 +16,7 @@ function Login() {
             const { email } = await signIn();
             await createUser(email);
             localStorage.setItem("email", email);
+            localStorage.setItem("id", 1);
             setSignedIn(true);
           }}
         >

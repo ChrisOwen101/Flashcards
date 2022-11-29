@@ -30,7 +30,7 @@ var cors = require("cors");
       "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT)"
     );
     await db.exec(
-      "CREATE TABLE card_response (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, card_id INTEGER, result TEXT)"
+      "CREATE TABLE card_response (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, card_id INTEGER, result TEXT, next_available DATE)"
     );
   } catch (e) {
     console.log(e);
@@ -41,10 +41,13 @@ var cors = require("cors");
     res.send(tags);
   });
 
-  app.get("/cards", async (req, res) => {
-    const result = await db.all(
-      "SELECT cards.id, cards.question, cards.answer FROM cards"
-    );
+  async function getCards(module) {
+    let result;
+    if (module) {
+      result = await db.all("SELECT * FROM cards WHERE module = ?", module);
+    } else {
+      result = await db.all("SELECT * FROM cards");
+    }
 
     for (let i = 0; i < result.length; i++) {
       result[i].tags = [];
@@ -61,7 +64,74 @@ var cors = require("cors");
       }
     }
 
+    return result;
+  }
+
+  app.get("/cards", async (req, res) => {
+    const module = queryParams.module;
+    const result = await getCards(module);
     res.send(result);
+  });
+
+  app.get("/cards/batch", async (req, res) => {
+    const queryParams = req.query;
+    const userid = queryParams.userid;
+    const tags = queryParams.tags ? queryParams.tags.split(",") : undefined;
+    const module = queryParams.module;
+    const date = new Date();
+
+    let cards = await getCards(module);
+
+    if (tags) {
+      console.log(tags);
+      cards = cards.filter((card) => {
+        let containsTag = false;
+        card.tags.forEach((cardTag) => {
+          tags.forEach((tag) => {
+            if (cardTag.name === tag) {
+              containsTag = true;
+            }
+          });
+        });
+        return containsTag;
+      });
+    }
+
+    const card_response = await db.all(
+      "SELECT * FROM card_response WHERE user_id = ?",
+      [userid]
+    );
+
+    const responseCards = [];
+
+    cards.forEach((card) => {
+      let shouldAdd = true;
+
+      card_response.forEach((response) => {
+        if (card.id === response.card_id) {
+          if (new Date(response.next_available) > date) {
+            shouldAdd = false;
+          }
+        }
+      });
+
+      if (shouldAdd) {
+        responseCards.push(card);
+      }
+    });
+
+    res.send(responseCards);
+  });
+
+  app.post("/cards/completed", async (req, res) => {
+    const { cardId, userId, result, nextAvailable } = req.body;
+
+    await db.run(
+      "INSERT INTO card_response (card_id, user_id, result, next_available) VALUES (?,?,?,?)",
+      [cardId, userId, result, nextAvailable]
+    );
+    res.send({ success: "Card Response Submitted" });
+    return;
   });
 
   app.post("/user", async (req, res) => {
@@ -94,7 +164,6 @@ var cors = require("cors");
     for (let i = 0; i < tags.length; i++) {
       const tag = tags[i];
       const tagExists = await db.get("SELECT * FROM tags WHERE name = ?", tag);
-      console.log();
       if (!tagExists) {
         await db.run("INSERT INTO tags (name) VALUES (?)", tag);
       }

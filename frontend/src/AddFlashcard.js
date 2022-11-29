@@ -4,13 +4,17 @@ import Header from "./Header";
 import ReactTags from "react-tag-autocomplete";
 import { getTags, addCard } from "./Networking";
 import { Navigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 function AddFlashcard() {
-  const [tags, setTags] = useState([]);
+  const location = useLocation();
+  const inputState = location.state ?? { tags: [] };
+
+  const [tags, setTags] = useState(inputState.tags);
   const [suggestions, setSuggestions] = useState([]);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [module, setModule] = useState("");
+  const [question, setQuestion] = useState(inputState.question);
+  const [answer, setAnswer] = useState(inputState.answer);
+  const [module, setModule] = useState(inputState.module);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
