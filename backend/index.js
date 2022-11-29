@@ -20,15 +20,105 @@ var cors = require("cors");
     await db.exec(
       "CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)"
     );
+    await db.run("INSERT INTO tags (name) VALUES (?)", "HTML");
+    await db.run("INSERT INTO tags (name) VALUES (?)", "CSS");
+    await db.run("INSERT INTO tags (name) VALUES (?)", "JavaScript");
+    await db.run("INSERT INTO tags (name) VALUES (?)", "TDD");
+    await db.run("INSERT INTO tags (name) VALUES (?)", "OOP");
+  } catch (e) {
+    console.log(e);
+  }
+
+  try {
     await db.exec(
       "CREATE TABLE cards (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT, module TEXT)"
     );
+
+    await db.run(
+      "INSERT INTO cards (question, answer, module) VALUES (?,?,?)",
+      [
+        "What does HTML stand for?",
+        "Hyper Text Mark-up Language",
+        "Fundamentals: Week 1",
+      ]
+    );
+
+    await db.run(
+      "INSERT INTO cards (question, answer, module) VALUES (?,?,?)",
+      [
+        "What does CSS stand for?",
+        "Cascading Style Sheet",
+        "Fundamentals: Week 1",
+      ]
+    );
+
+    await db.run(
+      "INSERT INTO cards (question, answer, module) VALUES (?,?,?)",
+      [
+        "What is the correct HTML element for inserting a line break?",
+        "<break>",
+        "Fundamentals: Week 1",
+      ]
+    );
+
+    await db.run(
+      "INSERT INTO cards (question, answer, module) VALUES (?,?,?)",
+      [
+        "What does every opening HTML tag need?",
+        "A closing tag",
+        "Fundamentals: Week 1",
+      ]
+    );
+
+    await db.run(
+      "INSERT INTO cards (question, answer, module) VALUES (?,?,?)",
+      [
+        "Choose the correct HTML element to define important text?",
+        "<b>",
+        "Fundamentals: Week 1",
+      ]
+    );
+  } catch (e) {
+    console.log(e);
+  }
+
+  try {
     await db.exec(
       "CREATE TABLE tags_merge_cards (tag_id INTEGER, card_id INTEGER)"
     );
+    await db.run(
+      "INSERT INTO tags_merge_cards (tag_id, card_id) VALUES (?,?)",
+      [1, 1]
+    );
+    await db.run(
+      "INSERT INTO tags_merge_cards (tag_id, card_id) VALUES (?,?)",
+      [2, 2]
+    );
+    await db.run(
+      "INSERT INTO tags_merge_cards (tag_id, card_id) VALUES (?,?)",
+      [1, 3]
+    );
+    await db.run(
+      "INSERT INTO tags_merge_cards (tag_id, card_id) VALUES (?,?)",
+      [1, 4]
+    );
+    await db.run(
+      "INSERT INTO tags_merge_cards (tag_id, card_id) VALUES (?,?)",
+      [1, 5]
+    );
+  } catch (e) {
+    console.log(e);
+  }
+
+  try {
     await db.exec(
       "CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT)"
     );
+  } catch (e) {
+    console.log(e);
+  }
+
+  try {
     await db.exec(
       "CREATE TABLE card_response (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, card_id INTEGER, result TEXT, next_available DATE)"
     );
